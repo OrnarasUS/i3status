@@ -71,8 +71,8 @@ string CPUTemp(){
     };
     return res;
 }
-string Battery(){
-    var text = File.ReadAllText("/sys/class/power_supply/BAT0/capacity");
+string Battery(byte idBAT = 0){
+    var text = File.ReadAllText($"/sys/class/power_supply/BAT{idBAT}/capacity");
     var bat = int.Parse(text);
     return $"{{\"full_text\": \"🔋 {bat}\", \"min_width\": \"🔋 100\", \"align\": \"center\"{(bat <= 15?", \"color\":\"#FFFF00\"":"")}}}";
 }
