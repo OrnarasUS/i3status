@@ -18,12 +18,15 @@ async Task<string> VPNInfo(string ip){
     return $"{{\"full_text\":\"VPN\", \"color\": \"#{color}\"}}";
 }
 string NetworkInfo(string ifname) {
+    try
+    {
     var host = NetworkInterface.GetAllNetworkInterfaces();    
     var netface = host.First(i => i.Name == ifname);
     var address = netface.GetIPProperties().UnicastAddresses
         .First(i => i.Address.AddressFamily == AddressFamily.InterNetwork);
     var text = $"IP: {address.Address}";
-    switch (netface.OperationalStatus) {
+        switch (netface.OperationalStatus)
+        {
         case OperationalStatus.Up:
             return $"{{\"full_text\":\"IP: {address.Address}\",\"color\":\"#32CD32\"}}";
         case OperationalStatus.Down:
@@ -35,6 +38,11 @@ string NetworkInfo(string ifname) {
             return "{\"full_text\":\"{sleep}\",\"color\":\"#FFFF00\"}";
         default:
             return "{\"full_text\":\"???\",\"color\":\"#FFFF00\"}";
+    }
+}
+    catch
+    {
+        return "{\"full_text\":\"{down}\",\"color\":\"#FF0000\"}";
     }
 }
 string Time() =>
