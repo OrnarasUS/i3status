@@ -2,21 +2,6 @@
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
-var http = new HttpClient{Timeout = new TimeSpan(0,0,0,0,250)};
-
-async Task<string> VPNInfo(string ip){
-    string color;
-    try
-    {
-        var resp = await http.GetAsync("http://ipinfo.io/ip");
-        color = await resp.Content.ReadAsStringAsync() == ip?"00FF00":"FF0000";
-    } 
-    catch 
-    {
-        color = "FF0000";
-    }
-    return $"{{\"full_text\":\"VPN\", \"color\": \"#{color}\"}}";
-}
 string NetworkInfo(string ifname) {
     try
     {
@@ -66,15 +51,16 @@ string CPUTemp(){
     var res = $"{{\"full_text\": \"{temp:f0} °C\"";
     res += temp switch{
         < 50 => "}",
-        >= 65 => "\"color\": \"#FF0000\"}",
+        >= 65 => ", \"color\": \"#FF0000\"}",
         _ => ", \"color\": \"#FFFF00\"}"
     };
     return res;
 }
 string Battery(byte idBAT = 0){
     var text = File.ReadAllText($"/sys/class/power_supply/BAT{idBAT}/capacity");
+    var charging = File.ReadAllText($"/sys/class/power_supply/BAT{idBAT}/status").StartsWith("Charging");
     var bat = int.Parse(text);
-    return $"{{\"full_text\": \"🔋 {bat}\", \"min_width\": \"🔋 100\", \"align\": \"center\"{(bat <= 15?", \"color\":\"#FFFF00\"":"")}}}";
+    return $"{{\"full_text\": \"{(charging?"⚡":"🔋")} {bat}\", \"min_width\": \"🔋 100\", \"align\": \"center\"{(bat <= 15?", \"color\":\"#FFFF00\"":"")}}}";
 }
 
 
@@ -85,7 +71,6 @@ while (true){
     text += $"{CPUTemp()},";
     text += $"{Language()},";
     text += $"{NetworkInfo("wlp59s0")},";
-    //text += $"{(await VPNInfo("178.130.42.57"))},";
     text += $"{Battery()},";
     text += $"{Time()}";
     text += "],";    
